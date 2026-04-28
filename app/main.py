@@ -1,3 +1,8 @@
+import sys
+print("Python path:", sys.path)
+print("Current directory files:", os.listdir("."))
+print("App directory files:", os.listdir("app"))
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
