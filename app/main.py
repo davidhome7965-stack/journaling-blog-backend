@@ -2,8 +2,17 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from app.database.postgres import engine, Base
+
 import os
+
+
+from app.database.postgres import engine, Base
+
+@app.on_event("startup")
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
 
 # सही import – routes app के अंदर है
 from app.routes.posts import router as posts_router
@@ -39,7 +48,3 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 async def root():
     return {"message": "Journaling Blog API is running", "docs": "/docs"}
 
-@app.on_event("startup")
-async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)

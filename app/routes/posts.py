@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
-from app.models.post import PostCreate, PostUpdate, PostResponse   # ✅ app. लगाया
-import app.services.post_service as post_service               # ✅ app. लगाया
-from app.routes.auth import verify_token    
+from app.schemas.post import PostCreate, PostUpdate, PostResponse
+import app.services.post_service as post_service
+from app.routes.auth import verify_token
+# ... the rest of your route code unchanged ... 
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
