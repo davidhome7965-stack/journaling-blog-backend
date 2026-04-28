@@ -22,3 +22,5 @@ async def upload_image(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
     
     return {"url": f"/uploads/{safe_filename}"}
+
+    print(f"File saved to: {file_path}")
