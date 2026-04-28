@@ -1,49 +1,29 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from sqlalchemy import Column, String, DateTime, Text, JSON
+from sqlalchemy.dialects.postgresql import UUID
+from app.database.postgres import Base
+import uuid
 from datetime import datetime
-from bson import ObjectId
 
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+class Post(Base):
+    __tablename__ = "posts"
 
-    @classmethod
-    def validate(cls, v, info):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid ObjectId")
-        return ObjectId(v)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    title = Column(String(200), nullable=False)
+    slug = Column(String(200), unique=True, index=True, nullable=False)
+    content = Column(Text, nullable=False)
+    author = Column(String(100), default="Admin")
+    tags = Column(JSON, default=list)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, onupdate=datetime.utcnow)
 
-    @classmethod
-    def __get_pydantic_json_schema__(cls, core_schema, handler):
-        from pydantic.json_schema import JsonSchemaValue
-        json_schema = handler(core_schema)
-        json_schema.update(type="string")
-        return json_schema
-
-class PostCreate(BaseModel):
-    title: str
-    slug: str
-    content: str
-    author: str = "Admin"
-    tags: list[str] = []
-
-class PostUpdate(BaseModel):
-    title: Optional[str] = None
-    slug: Optional[str] = None
-    content: Optional[str] = None
-    author: Optional[str] = None
-    tags: Optional[list[str]] = None
-
-class PostResponse(BaseModel):
-    id: str = Field(alias="_id")
-    title: str
-    slug: str
-    content: str
-    author: str
-    createdAt: str
-    updatedAt: Optional[str] = None
-    tags: list[str] = []
-
-    class Config:
-        populate_by_name = True
+    def to_dict(self):
+        return {
+            "_id": str(self.id),
+            "title": self.title,
+            "slug": self.slug,
+            "content": self.content,
+            "author": self.author,
+            "tags": self.tags or [],
+            "createdAt": self.created_at.isoformat(),
+            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
+        }
